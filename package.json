@@ -1,0 +1,30 @@
+{
+  "name": "publishstatus-bitbucket",
+  "version": "0.5.0",
+  "description": "Command NodeJS tool - Publish Commit Status to Bitbucket Server (Atlassian Stash).",
+  "main": "publishstatus-bitbucket.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/denis1stomin/publishstatus-bitbucket.git"
+  },
+  "keywords": [
+    "nodejs",
+    "cmd",
+    "shell",
+    "bitbucket",
+    "stash",
+    "git",
+    "commit",
+    "status"
+  ],
+  "author": "Denis Istomin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/denis1stomin/publishstatus-bitbucket/issues"
+  },
+  "homepage": "https://github.com/denis1stomin/publishstatus-bitbucket#readme",
+  "dependencies": {}
+}
