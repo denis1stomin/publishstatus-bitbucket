@@ -26,5 +26,7 @@
     "url": "https://github.com/denis1stomin/publishstatus-bitbucket/issues"
   },
   "homepage": "https://github.com/denis1stomin/publishstatus-bitbucket#readme",
-  "dependencies": {}
+  "dependencies": {
+    "minimist": "^1.2.0"
+  }
 }
