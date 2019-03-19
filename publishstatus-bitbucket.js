@@ -16,7 +16,7 @@ const printHelp = () => {
     console.log('  -b --bitbucket-server    [*] Butbucket server base URL.');
     console.log('  -c --commit-hash         [*] Target commit hash.');
     console.log('  -p --configuration       [*] Build pipeline configuration ID or name.');
-    console.log('  -u --username            [*] Bitbucket user name.');
+    console.log('  -u --username            [*] Bitbucket user name. Can use BITBUCKET_USERNAME env variable.');
     console.log('  -l --build-url           [*] Link to the build details.');
     console.log('  -s --status              Build status INPROGRESS|SUCCESSFUL|FAILED. Defaults to SUCCESSFUL.');
     console.log('  -n --build-name          Build ID or name.');
@@ -25,7 +25,7 @@ const printHelp = () => {
     console.log('  -h --help                Prints this help message.');
 };
 
-const badArgAndExit = msg => {
+const errMessageAndExit = msg => {
     console.log(`ERROR. ${msg}.`);
     console.log('');
     printHelp();
@@ -40,38 +40,79 @@ const BuilderType = {
 };
 
 const recognizeBuildServer = () => {
-    // TODO: use ENV variables
+    // https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml
+    if (process.env['AGENT_OSARCHITECTURE'])
+        return BuilderType.VSTS;
+
     return BuilderType.UNKNOWN;
+};
+
+const tryGetCommitHash = () => {
+    const type = recognizeBuildServer();
+    if (type === BuilderType.VSTS) {
+        return process.env['Build.SourceVersion'];
+    }
+};
+
+const tryGetBuildStatus = () => {
+    const type = recognizeBuildServer();
+    if (type === BuilderType.VSTS) {
+        return process.env['Agent.JobStatus'];
+    }
+};
+
+const tryGetConfigurationName = () => {
+    const type = recognizeBuildServer();
+    if (type === BuilderType.VSTS) {
+        return process.env['Build.DefinitionName'] || process.env['Agent.JobName'];
+    }
+};
+
+const tryGetBuildName = () => {
+    const type = recognizeBuildServer();
+    if (type === BuilderType.VSTS) {
+        return `${tryGetConfigurationName()} - ${process.env['Build.BuildNumber']}`;
+    }
+};
+
+const tryGetBuildUrl = () => {
+    const type = recognizeBuildServer();
+    if (type === BuilderType.VSTS) {
+        return process.env['Build.BuildUri'];
+    }
+};
+
+const tryGetDescription = () => {
+    const type = recognizeBuildServer();
+    if (type === BuilderType.VSTS) {
+        // TODO; add build warnings
+    }
 };
 
 const composeCmdConfig = (arg) => {
     let config = {
-        builder: recognizeBuildServer(),
         server: arg.b || arg['bitbucket-server'],
-        commit: arg.c || arg['commit-hash'],
-        username: arg.u || arg['username'],
+        commit: arg.c || arg['commit-hash'] || tryGetCommitHash(),
+        username: arg.u || arg['username'] || process.env.BITBUCKET_USERNAME,
         maxRetry: arg.r || arg['max-retry'] || 100,
         payload: {
-            state: arg.s || arg['status'] || 'SUCCESSFUL',
-            key: arg.p || arg['configuration'],
-            url: arg.l || arg['build-url']
+            state: arg.s || arg['status'] || tryGetBuildStatus() || 'SUCCESSFUL',
+            key: arg.p || arg['configuration'] || tryGetConfigurationName(),
+            url: arg.l || arg['build-url'] || tryGetBuildUrl()
         }
     };
 
-    if (!config.server) badArgAndExit('I need Bitbucket base URL to publish the status');
-    if (!config.commit) badArgAndExit('I need git commit hash to publish the status');
-    if (!config.username) badArgAndExit('I need bitbucket username to publish the status');
+    if (!config.server) errMessageAndExit('I need Bitbucket base URL to publish the status');
+    if (!config.commit) errMessageAndExit('I need git commit hash to publish the status');
+    if (!config.username) errMessageAndExit('I need bitbucket username to publish the status');
+    if (!config.payload.key) errMessageAndExit('I need build configuration ID to publish the status');
+    if (!config.payload.url) errMessageAndExit('I need a link to the build details to publish the status');
 
-    // Required parameters
-    // TODO: Check ENV variables like PIPELINE_NAME, configurationName and JenkinsStuff
-    if (!config.payload.key) badArgAndExit('I need build configuration ID to publish the status');
-    if (!config.payload.url) badArgAndExit('I need a link to the build details to publish the status');
-
-    const name = arg.n || arg['build-name']; // || config.buildConfig;
+    const name = arg.n || arg['build-name'] || tryGetBuildName();
     if (name)
         config.payload.name = name;
 
-    const description = arg.d || arg['description'];
+    const description = arg.d || arg['description'] || tryGetDescription();
     if (description)
         config.payload.description = description;
 
@@ -79,9 +120,9 @@ const composeCmdConfig = (arg) => {
 };
 
 const getAuthorization = (cmdConfig) => {
-    const passw = process.env.BITBUCKET_USER_PASSWORD;
+    const passw = process.env.BITBUCKET_PASSWORD;
     if (!passw)
-        badArgAndExit('I need BITBUCKET_USER_PASSWORD environment variable to publish the status');
+        errMessageAndExit('I need BITBUCKET_PASSWORD environment variable to publish the status');
 
     const token = Buffer.from(`${cmdConfig.username}:${passw}`).toString('base64')
     return `Basic ${token}`;
@@ -100,13 +141,13 @@ const postStatus = (cmdConfig, retryNum) => {
             }
         },
         resp => {
-            if (resp.statusCode === 204) {
+            if ((resp.statusCode >= 200) && (resp.statusCode < 300)) {
                 console.log('Successfully published the status.');
                 process.exit(0);
             }
 
             if (resp.statusCode === 401) {
-                badArgAndExit('Cannot authorize the request. Provide correct Bitbucket credential');
+                errMessageAndExit('Cannot authorize the request. Provide correct Bitbucket credential');
             }
 
             retryNum = retryNum + 1;
