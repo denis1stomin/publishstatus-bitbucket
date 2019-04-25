@@ -7,7 +7,7 @@
     "publishstatus-bitbucket": "publishstatus-bitbucket.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "publish": "nodejs ./publishstatus-bitbucket.js"
   },
   "repository": {
     "type": "git",
