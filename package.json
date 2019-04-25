@@ -1,6 +1,6 @@
 {
   "name": "publishstatus-bitbucket",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Command line NodeJS tool - Publish Commit Status to Bitbucket Server (Atlassian Stash).",
   "main": "publishstatus-bitbucket.js",
   "scripts": {
