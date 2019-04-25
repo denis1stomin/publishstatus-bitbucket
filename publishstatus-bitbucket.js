@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Bitbucket API description
 // https://developer.atlassian.com/server/bitbucket/how-tos/updating-build-status-for-commits/
 //
