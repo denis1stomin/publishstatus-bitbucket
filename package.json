@@ -1,7 +1,7 @@
 {
   "name": "publishstatus-bitbucket",
   "version": "0.5.0",
-  "description": "Command NodeJS tool - Publish Commit Status to Bitbucket Server (Atlassian Stash).",
+  "description": "Command line NodeJS tool - Publish Commit Status to Bitbucket Server (Atlassian Stash).",
   "main": "publishstatus-bitbucket.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
