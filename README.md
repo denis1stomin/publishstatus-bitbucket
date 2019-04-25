@@ -1,4 +1,5 @@
-# Publish build status to Bitbucket - publishstatus-bitbucket
+# Publish build status to Bitbucket
+[![Known Vulnerabilities](https://snyk.io/test/github/denis1stomin/publishstatus-bitbucket/badge.svg?targetFile=package.json)](https://snyk.io/test/github/denis1stomin/publishstatus-bitbucket?targetFile=package.json)
 Simple NodeJs command line application to publish commit status to Bitbucket (Atlassian Stash).
 
 https://www.npmjs.com/package/publishstatus-bitbucket
