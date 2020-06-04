@@ -1,6 +1,6 @@
 {
   "name": "publishstatus-bitbucket",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Command line NodeJS tool - Publish Commit Status to Bitbucket Server (Atlassian Stash).",
   "main": "publishstatus-bitbucket.js",
   "bin": {
@@ -30,6 +30,6 @@
   },
   "homepage": "https://github.com/denis1stomin/publishstatus-bitbucket#readme",
   "dependencies": {
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.2"
   }
 }
