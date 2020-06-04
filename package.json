@@ -30,6 +30,6 @@
   },
   "homepage": "https://github.com/denis1stomin/publishstatus-bitbucket#readme",
   "dependencies": {
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.2"
   }
 }
